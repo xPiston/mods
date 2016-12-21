@@ -1,0 +1,4 @@
+item.Steak.name=Steak
+item.LiquidSteak.name=Steak liquide
+death.attack.craftechneeds.thirst=%1$s a oublié de s'hydrater
+death.attack.craftechneeds.bleeding=%1$s s'est vidé-e de son sang

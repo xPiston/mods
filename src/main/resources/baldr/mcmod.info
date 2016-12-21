@@ -1,0 +1,16 @@
+[
+{
+  "modid": "baldr",
+  "name": "Craftech | Baldr",
+  "description": "The system of content description and managment",
+  "version": "${version}",
+  "mcversion": "${mcversion}",
+  "url": "",
+  "updateUrl": "",
+  "authorList": ["Ourten"],
+  "credits": "",
+  "logoFile": "",
+  "screenshots": [],
+  "dependencies": []
+}
+]

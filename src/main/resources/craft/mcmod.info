@@ -1,0 +1,17 @@
+[
+{
+  "modid": "craftechcraft",
+  "name": "Craftech Craft",
+  "description": "The craft system of Craftech.",
+  "version": "${version}",
+  "mcversion": "${mcversion}",
+  "url": "",
+  "updateUrl": "",
+  "authorList": ["Thog"],
+  "credits": "",
+  "logoFile": "",
+  "screenshots": [],
+  "dependencies": []
+}
+]
+

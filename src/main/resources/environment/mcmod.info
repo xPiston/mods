@@ -1,0 +1,16 @@
+[
+{
+  "modid": "craftechenvironment",
+  "name": "Craftech | Environment",
+  "description": "The Craftech environment mod.",
+  "version": "${version}",
+  "mcversion": "${mcversion}",
+  "url": "",
+  "updateUrl": "",
+  "authorList": ["Arisu"],
+  "credits": "",
+  "logoFile": "",
+  "screenshots": [],
+  "dependencies": []
+}
+]

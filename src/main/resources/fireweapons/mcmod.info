@@ -1,0 +1,16 @@
+[
+{
+  "modid": "craftechfireweapons",
+  "name": "Craftech | Fire Weapons",
+  "description": "The Craftech fire weapons mod.",
+  "version": "${version}",
+  "mcversion": "${mcversion}",
+  "url": "",
+  "updateUrl": "",
+  "authorList": ["Ourten"],
+  "credits": "",
+  "logoFile": "",
+  "screenshots": [],
+  "dependencies": []
+}
+]

@@ -1,0 +1,208 @@
+buildscript {
+	repositories {
+		mavenCentral()
+		jcenter()
+		maven {
+			name = "forge"
+			url = "http://files.minecraftforge.net/maven"
+		}
+		maven {
+			name = "sonatype"
+			url = "https://oss.sonatype.org/content/repositories/snapshots/"
+		}
+	}
+	dependencies {
+		classpath 'net.minecraftforge.gradle:ForgeGradle:1.2-SNAPSHOT'
+	}
+}
+
+apply plugin: 'forge'
+
+version = "alpha-0.5"
+archivesBaseName = "Craftech"
+
+compileJava.options.encoding = 'UTF-8'
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
+minecraft {
+	version = "1.7.10-10.13.4.1614-1.7.10"
+	runDir = "eclipse"
+	mappings = "stable_12"
+}
+
+repositories {
+	mavenLocal()
+ 	mavenCentral()
+    maven { url "http://maven.ferenyr.info/artifactory/ourten"}
+    maven { url "http://maven.ferenyr.info/artifactory/yggard"}
+}
+
+class CraftechMod {
+	private String modid
+	private String[] javaFolders
+	private String[] assetsFolders
+	private boolean sided
+}
+
+ext.mods = [:]
+mods["baldr"] = new CraftechMod(modid: 'baldr', javaFolders: ['fr/craftechmc/baldr/'], assetsFolders: [], sided: false)
+mods["contentmod"] = new CraftechMod(modid: 'contentmod', javaFolders: ['fr/craftechmc/contentmod/'], assetsFolders: ['assets/craftechcontentmod/'], sided: true)
+mods["fireweapons"] = new CraftechMod(modid: 'fireweapons', javaFolders: ['fr/craftechmc/weaponry/'], assetsFolders: ['assets/craftechweaponry/'], sided: false)
+mods["tracking"] = new CraftechMod(modid: 'tracking', javaFolders: ['fr/craftechmc/tracking/'], assetsFolders: ['assets/craftechtracking/'], sided: false)
+mods["admin"] = new CraftechMod(modid: 'admin', javaFolders: ['fr/craftechmc/admin/'], assetsFolders: ['assets/craftechadmin/'], sided: true)
+mods["craft"] = new CraftechMod(modid: 'craft', javaFolders: ['fr/craftechmc/craft/'], assetsFolders: ['assets/craftechcraft/'], sided: false)
+mods["core"] = new CraftechMod(modid: 'core', javaFolders: ['fr/craftechmc/core/', 'com/unascribed/'], assetsFolders: ['assets/craftechcore/'], sided: false)
+mods["loots"] = new CraftechMod(modid: 'loots', javaFolders: ['fr/craftechmc/loots/'], assetsFolders: ['assets/craftechloots/'], sided: true)
+mods["lootsediting"] = new CraftechMod(modid: '', javaFolders: ['fr/craftechmc/lootsediting/'], assetsFolders: ['assets/craftechlootsediting/'], sided: true)
+mods["zombie"] = new CraftechMod(modid: 'zombie', javaFolders: ['fr/craftechmc/zombie/'], assetsFolders: ['assets/zombie/'], sided: false)
+mods["needs"] = new CraftechMod(modid: 'needs', javaFolders: ['fr/craftechmc/needs/'], assetsFolders: ['assets/craftechneeds/'], sided: true)
+mods["environment"] = new CraftechMod(modid: 'environment', javaFolders: ['fr/craftechmc/environment/'], assetsFolders: ['assets/craftechenvironment/'], sided: true)
+mods["social"] = new CraftechMod(modid: 'social', javaFolders: ['fr/craftechmc/social/'], assetsFolders: ['assets/craftechsocial/'], sided: true)
+
+sourceSets {
+	main {
+		java {
+			srcDirs = mods.keySet().collect({'src/main/java/' << it})
+		}
+		resources {
+			srcDirs = mods.keySet().collect({'src/main/resources/' << it})
+		}
+	}
+	test {
+		java {
+			srcDirs = ["src/test/java"]
+		}
+	}
+}
+
+dependencies {
+	compile "org.mongodb:mongo-java-driver:3.2.2"
+	compile "com.dorkbox:TweenEngine:7.13"
+	compile "fr.ourten:teabeans:0.3.4"
+	compile "org.yggard:brokkgui-binding-mc1.7.10:0.3.1:dev"
+	testCompile "junit:junit:4.12"
+}
+
+processResources
+{
+	inputs.property "version", project.version
+	inputs.property "mcversion", project.minecraft.version
+	from(sourceSets.main.resources.srcDirs) {
+		include 'mcmod.info'
+		expand 'version':project.version, 'mcversion':project.minecraft.version
+	}
+	from(sourceSets.main.resources.srcDirs) {
+		exclude 'mcmod.info'
+	}
+}
+
+ext.coreJar = "build/libs/" + archivesBaseName + "-" + version + ".jar"
+
+jar
+{
+	includes.addAll('fr/**')
+	includes.addAll('assets/**')
+	includes.addAll('com/**')
+	includes.addAll('mcmod.info')
+	includes.addAll('LICENSE.txt')
+}
+
+def moveMcModInfo(artifactName, side) {
+	return tasks.create("move${artifactName}${side}McmodInfo", Copy) {
+		dependsOn reobf
+		from(zipTree(project.ext.coreJar))
+		from 'src/main/resources/'+artifactName+'/mcmod.info'
+		into 'temporary'
+	}
+}
+
+def rePackAllJar(artifactName, side) {
+	return tasks.create("rePackAllJar${artifactName}${side}", Jar) {
+		dependsOn moveMcModInfo(artifactName, side)
+		from 'temporary'
+	}
+}
+
+def packJar(artifactName, side) {
+	return tasks.create("pack${artifactName}${side}Jar", Jar) {
+		dependsOn rePackAllJar(artifactName, side)
+		outputs.upToDateWhen {false}
+
+		from(zipTree(project.ext.coreJar))
+		{
+			if(side != "universal")
+			{
+				if(project.mods["${artifactName}"].sided)
+				{
+					includes.addAll(project.mods["${artifactName}"].javaFolders.collect({it << 'common/'}))
+					if(side.equals("server"))
+						includes.addAll(project.mods["${artifactName}"].javaFolders.collect({it << 'server/'}))
+					else if(side.equals("client"))
+						includes.addAll(project.mods["${artifactName}"].javaFolders.collect({it << 'client/'}))
+				}
+				else
+					includes.addAll(project.mods["${artifactName}"].javaFolders)
+				if(side.equals("client"))
+					includes.addAll(project.mods["${artifactName}"].assetsFolders)
+			}
+			else
+			{
+				includes.addAll(project.mods["${artifactName}"].javaFolders)
+				includes.addAll(project.mods["${artifactName}"].assetsFolders)
+			}
+			includes.addAll('mcmod.info')
+			includes.addAll('LICENSE.txt')
+		}
+		baseName = "["+side.capitalize() +"]Craftech-" + artifactName.capitalize()
+	}
+}
+
+task cleanExtra(type: Delete, dependsOn: "moveAllJars") {
+	delete project.ext.coreJar
+	delete 'temporary'
+	delete fileTree('build/libs') {
+		include '**/[*'
+	}
+}
+
+task moveAllJars(type: Copy, dependsOn: "buildAllJars") {
+	from 'build/libs/'
+	into 'build/libs/'
+	rename { String fileName ->
+        if(fileName.contains("[Client]"))
+     	   fileName.replace('[Client]', '').replace('.jar', '.client.jar')
+        else if(fileName.contains("[Server]"))
+      	  fileName.replace('[Server]', '').replace('.jar', '.server.jar')
+    }
+}
+
+task buildAllJars {
+	mods.keySet().each {
+		dependsOn packJar("${it}", "client")
+		dependsOn packJar("${it}", "server")
+	}
+}
+
+task cleanUniversalJars(type: Delete, dependsOn: "moveUniversalJars") {
+	delete project.ext.coreJar
+	delete 'temporary'
+	delete fileTree('build/libs') {
+		include '**/[*'
+	}
+}
+
+task moveUniversalJars(type: Copy, dependsOn: "buildUniversalJars") {
+	from 'build/libs/'
+	into 'build/libs/'
+	rename { String fileName ->
+        if(fileName.contains("[Universal]"))
+     	   fileName.replace('[Universal]', '').replace('.jar', '.universal.jar')
+    }
+}
+
+task buildUniversalJars {
+	mods.keySet().each {
+		dependsOn packJar("${it}", "universal")
+	}
+}

@@ -1,0 +1,16 @@
+[
+{
+  "modid": "craftechcontent",
+  "name": "Craftech | ContentMod",
+  "description": "The major content mod of Craftech. Models, blocks...",
+  "version": "${version}",
+  "mcversion": "${mcversion}",
+  "url": "",
+  "updateUrl": "",
+  "authorList": ["Ourten"],
+  "credits": "",
+  "logoFile": "",
+  "screenshots": [],
+  "dependencies": []
+}
+]

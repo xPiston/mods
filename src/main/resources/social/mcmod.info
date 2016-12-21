@@ -1,0 +1,16 @@
+[
+{
+  "modid": "craftechsocial",
+  "name": "Craftech | Social",
+  "description": "The Craftech social mod.",
+  "version": "${version}",
+  "mcversion": "${mcversion}",
+  "url": "",
+  "updateUrl": "",
+  "authorList": ["Aursen"],
+  "credits": "",
+  "logoFile": "",
+  "screenshots": [],
+  "dependencies": []
+}
+]
